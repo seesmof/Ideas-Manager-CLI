@@ -22,7 +22,7 @@
 
 ### Встановлення та використання
 
-- Завантажте [останню версію](https://github.com/seesmof/project-ideas-manager/releases/latest) з GitHub
+- Завантажте [останню версію](https://github.com/seesmof/project-ideas-manager-cli/archive/refs/tags/v1.0.0.zip) з GitHub
   - Переконайтеся, що на вашій системі встановлено Python 3.10 або новішої версії. Якщо ні, будь ласка, зробіть це спочатку - [остання версія](https://www.python.org/downloads/)
 - Розархівуйте архів у будь-яку директорію, куди ви хочете, щоб додаток був встановлений
 - Запустіть за допомогою файлу `Run.bat`.
