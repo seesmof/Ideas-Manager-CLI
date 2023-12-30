@@ -15,6 +15,7 @@
 - [Table of contents](#table-of-contents)
 - [Overview](#overview)
 - [Installation and Usage](#installation-and-usage)
+- [Screenshots](#screenshots)
 - [Links](#links)
 - [License](#license)
 
@@ -29,6 +30,10 @@ Project ideas manager is a simple yet powerful CLI tool for managing personal pr
 - Unzip the archive to whichever directory you would like the app to live in
 - Run using `Run.bat` file
 - Enjoy!
+
+### Screenshots
+
+![App](./public/app.png)
 
 ### Links
 
