@@ -6,4 +6,4 @@ if not exist "./data/packages_info.txt" (
 
 cls
 python ./src/main.py
-exit
+pause
