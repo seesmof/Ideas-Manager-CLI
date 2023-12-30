@@ -75,7 +75,11 @@ def add():
 @pm_shell.command()
 def remove():
     rows = getTableRows(cursor=cursor, console=console)
+    if not rows:
+        console.print("[red]No project ideas found[/]. Create one with 'add'")
+        return
     renderIdeasTable(rows=rows, console=console)
+
     try:
         ideaId = int(input("Enter the ID of the project idea you want to remove: "))
     except Exception:

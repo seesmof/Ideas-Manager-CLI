@@ -31,7 +31,10 @@
 
 ### Скріншоти
 
-![Додаток](../public/app.png)
+![Додаток](../public/help.png)
+![Додаток](../public/adding.png)
+![Додаток](../public/editing.png)
+![Додаток](../public/removing.png)
 
 ### Посилання
 

@@ -33,7 +33,10 @@ Project ideas manager is a simple yet powerful CLI tool for managing personal pr
 
 ### Screenshots
 
-![App](./public/app.png)
+![App](./public/help.png)
+![App](./public/adding.png)
+![App](./public/editing.png)
+![App](./public/removing.png)
 
 ### Links
 
