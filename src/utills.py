@@ -15,7 +15,7 @@ class Difficulty(Enum):
     HARD = "hard"
 
 
-def getTableRows(cursor: sqlite3.Cursor, console) -> list:
+def getTableRows(cursor: sqlite3.Cursor, console: object) -> list:
     createTable(connection=cursor.connection, cursor=cursor)
     cursor.execute("SELECT * FROM project_ideas")
     rows = cursor.fetchall()
@@ -54,7 +54,7 @@ def addTask(
     connection.commit()
 
 
-def getNewIdeaData(console) -> tuple:
+def getIdeaData(console: object) -> tuple:
     console.print()
 
     name = input("Project Name - Required\n: ")
@@ -67,10 +67,14 @@ def getNewIdeaData(console) -> tuple:
     name = name.title() if name else None
     description = description if description else None
 
-    status = Status(status) if status in [s.value for s in Status] else Status.TODO
+    status = (
+        Status(status)
+        if status.lower() in [s.value.lower() for s in Status]
+        else Status.TODO
+    )
     difficulty = (
         Difficulty(difficulty)
-        if difficulty in [d.value for d in Difficulty]
+        if difficulty.lower() in [d.value.lower() for d in Difficulty]
         else Difficulty.EASY
     )
 

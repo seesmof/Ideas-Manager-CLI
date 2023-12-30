@@ -8,7 +8,7 @@ import sqlite3
 from utills import (
     addTask,
     createTable,
-    getNewIdeaData,
+    getIdeaData,
     getTableRows,
     renderIdeasTable,
 )
@@ -53,7 +53,7 @@ Here is a list of all commands:
 
 @pm_shell.command()
 def add():
-    name, description, status, difficulty = getNewIdeaData(console=console)
+    name, description, status, difficulty = getIdeaData(console=console)
 
     if not name:
         console.print("[red]Name cannot be empty[/]")
@@ -104,7 +104,7 @@ def edit():
         console.print("[red]Invalid ID[/]")
         return
 
-    name, description, status, difficulty = getNewIdeaData(console=console)
+    name, description, status, difficulty = getIdeaData(console=console)
 
     if not name:
         console.print("[red]Name cannot be empty[/]")
