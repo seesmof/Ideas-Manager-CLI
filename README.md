@@ -25,7 +25,7 @@ Project ideas manager is a simple yet powerful CLI tool for managing personal pr
 
 ### Installation and Usage
 
-- Download [latest version](https://github.com/seesmof/project-ideas-manager-cli/archive/refs/tags/v1.0.1.zip) from GitHub
+- Download [latest version](https://github.com/seesmof/project-ideas-manager-cli/archive/refs/tags/v1.1.0.zip) from GitHub
   - Make sure you have Python 3.10 or later installed on your system. If not, please do that first - [latest](https://www.python.org/downloads/)
 - Unzip the archive to whichever directory you would like the app to live in
 - Run using `Run.bat` file
