@@ -28,7 +28,7 @@ cursor = connection.cursor()
 )
 def pm_shell():
     console.print(
-        md("Welcome to _Project Ideas Manager_!\n\nEnter `help` for list of commands")
+        "Welcome to [bold]Project Ideas Manager[/]!\nEnter 'help' for list of commands"
     )
 
 
