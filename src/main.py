@@ -1,4 +1,5 @@
 from os import path
+import inquirer
 from rich.markdown import Markdown as md
 from rich.console import Console
 from rich.traceback import install
@@ -7,7 +8,7 @@ import sqlite3
 
 from utills import (
     addTask,
-    createTable,
+    editGivenProp,
     getIdeaData,
     getTableRows,
     renderIdeasTable,
@@ -53,13 +54,7 @@ Here is a list of all commands:
 
 @pm_shell.command()
 def add():
-    name, description, status, difficulty = getIdeaData(console=console)
-
-    if not name:
-        console.print("[red]Name cannot be empty[/]")
-        return
-
-    createTable(connection=connection, cursor=cursor)
+    name, description, status, difficulty = getIdeaData()
     addTask(
         name=name,
         description=description,
@@ -68,73 +63,63 @@ def add():
         connection=connection,
         cursor=cursor,
     )
-
-    console.print("[green]Task added successfully[/]")
+    renderIdeasTable(rows=getTableRows(cursor=cursor), console=console)
 
 
 @pm_shell.command()
 def remove():
-    rows = getTableRows(cursor=cursor, console=console)
-    if not rows:
-        console.print("[red]No project ideas found[/]. Create one with 'add'")
-        return
-    renderIdeasTable(rows=rows, console=console)
+    renderIdeasTable(rows=getTableRows(cursor=cursor), console=console)
 
-    try:
-        ideaId = int(input("Enter the ID of the project idea you want to remove: "))
-    except Exception:
-        console.print("[red]Invalid ID[/]")
-        return
+    idQuestions = [
+        inquirer.Text(
+            "id",
+            message="Enter ID of the project idea you want to remove",
+            validate=lambda _, x: x != "" and x.isdigit(),
+        ),
+    ]
+    idAnswers = inquirer.prompt(idQuestions)
+    ideaId = int(idAnswers["id"])
 
     try:
         cursor.execute("DELETE FROM project_ideas WHERE id = ?", (ideaId,))
         connection.commit()
-        console.print("[green]Task removed successfully[/]")
+        console.print(f"[green]Removed task with ID {ideaId}[/]")
     except Exception as e:
         console.print(f"[red]Failed to remove task: {e}[/]")
 
 
 @pm_shell.command()
 def edit():
-    rows = getTableRows(cursor=cursor, console=console)
-    if not rows:
-        console.print("[red]No project ideas found[/]. Create one with 'add'")
-        return
-    renderIdeasTable(rows=rows, console=console)
+    renderIdeasTable(rows=getTableRows(cursor=cursor), console=console)
 
-    try:
-        ideaId = int(input("Enter the ID of the project idea you want to edit: "))
-    except Exception:
-        console.print("[red]Invalid ID[/]")
-        return
-
-    name, description, status, difficulty = getIdeaData(console=console)
-
-    if not name:
-        console.print("[red]Name cannot be empty[/]")
-        return
-
-    sqlQuery = """
-        UPDATE project_ideas
-        SET name = ?, description = ?, status = ?, difficulty = ?
-        WHERE id = ?
-    """
-
-    with connection:
-        cursor.execute(
-            sqlQuery, (name, description, status.value, difficulty.value, ideaId)
+    idQuestions = [
+        inquirer.Text(
+            "id",
+            message="Enter ID of the project idea you want to edit",
+            validate=lambda _, x: x != "" and x.isdigit(),
         )
+    ]
+    idAnswers = inquirer.prompt(idQuestions)
+    ideaId = int(idAnswers["id"])
 
-    console.print("[green]Task edited successfully[/]")
+    propertySelectQuestions = [
+        inquirer.List(
+            "property",
+            message="Select property to edit",
+            choices=["name", "description", "status", "difficulty"],
+        )
+    ]
+    propertySelectAnswers = inquirer.prompt(propertySelectQuestions)
+
+    editGivenProp(
+        answer=propertySelectAnswers, id=ideaId, cursor=cursor, connection=connection
+    )
+    renderIdeasTable(rows=getTableRows(cursor=cursor), console=console)
 
 
 @pm_shell.command()
 def show():
-    rows = getTableRows(cursor=cursor, console=console)
-    if not rows:
-        return
-
-    renderIdeasTable(rows=rows, console=console)
+    renderIdeasTable(rows=getTableRows(cursor=cursor), console=console)
 
 
 if __name__ == "__main__":

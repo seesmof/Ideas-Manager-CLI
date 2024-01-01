@@ -1,5 +1,6 @@
 from enum import Enum
 import sqlite3
+import inquirer
 from rich.table import Table
 
 
@@ -13,16 +14,6 @@ class Difficulty(Enum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
-
-
-def getTableRows(cursor: sqlite3.Cursor, console: object) -> list:
-    createTable(connection=cursor.connection, cursor=cursor)
-    cursor.execute("SELECT * FROM project_ideas")
-    rows = cursor.fetchall()
-    if not rows:
-        console.print("[red]No project ideas found[/]. Create one with 'add'")
-        return []
-    return rows
 
 
 def createTable(cursor: sqlite3.Cursor, connection: sqlite3.Connection) -> None:
@@ -42,54 +33,72 @@ def createTable(cursor: sqlite3.Cursor, connection: sqlite3.Connection) -> None:
 def addTask(
     name: str,
     description: str,
-    status: Status,
-    difficulty: Difficulty,
+    status: str,
+    difficulty: str,
     connection: sqlite3.Connection,
     cursor: sqlite3.Cursor,
 ) -> None:
+    createTable(connection=connection, cursor=cursor)
     cursor.execute(
         "INSERT INTO project_ideas (name, description, status, difficulty) VALUES (?, ?, ?, ?)",
-        (name, description, status.value, difficulty.value),
+        (name, description, status, difficulty),
     )
     connection.commit()
 
 
-def getIdeaData(console: object) -> tuple:
-    console.print()
+def getTableRows(cursor: sqlite3.Cursor) -> list:
+    createTable(connection=cursor.connection, cursor=cursor)
+    cursor.execute("SELECT * FROM project_ideas")
+    rows = cursor.fetchall()
+    return rows
 
-    name = input("Project Name - Required\n: ")
-    description = input("Project Description - Can be empty\n: ")
-    status = input("Project Status - todo | doing | done. Default is todo\n: ")
-    difficulty = input("Project Difficulty - easy | medium | hard. Default is easy\n: ")
 
-    console.print()
+def getIdeaData() -> tuple:
+    taskQuestions = [
+        inquirer.Text(
+            "name",
+            message="Enter name of the project idea",
+            validate=lambda _, x: x != "",
+        ),
+        inquirer.Text(
+            "description",
+            message="Enter description of the project idea",
+        ),
+        inquirer.List(
+            "status",
+            message="Select status of the project idea",
+            choices=[s.value for s in Status],
+        ),
+        inquirer.List(
+            "difficulty",
+            message="Select difficulty of the project idea",
+            choices=[d.value for d in Difficulty],
+        ),
+    ]
+    taskAnswers = inquirer.prompt(taskQuestions)
 
-    name = name.title() if name else None
-    description = description if description else None
-
-    status = (
-        Status(status)
-        if status.lower() in [s.value.lower() for s in Status]
-        else Status.TODO
+    name, description, status, difficulty = (
+        taskAnswers.get(k, None)
+        for k in ["name", "description", "status", "difficulty"]
     )
-    difficulty = (
-        Difficulty(difficulty)
-        if difficulty.lower() in [d.value.lower() for d in Difficulty]
-        else Difficulty.EASY
-    )
-
     return name, description, status, difficulty
 
 
 def renderIdeasTable(rows: list, console: object) -> None:
+    if not rows:
+        console.print("[red]No project ideas found[/]. Create one with 'add'")
+        return
+
     t = Table("ID", "Name", "Description", "Status", "Difficulty")
 
     for row in rows:
         id, name, description, status, difficulty = row
         t.add_row(
             f"[bold]{id}[/]",
-            f"{name}",
-            f"{description[0].upper() + description[1:]}" if description else "",
+            f"{name.title()}",
+            f"{description[0].upper() + description[1:]}"
+            if description
+            else "No description",
             f"[blue]{status.title()}[/]"
             if status == "todo"
             else f"[yellow]{status.title()}[/]"
@@ -103,3 +112,60 @@ def renderIdeasTable(rows: list, console: object) -> None:
         )
 
     console.print(t)
+
+
+def editGivenProp(
+    answer: dict, id: int, cursor: sqlite3.Cursor, connection: sqlite3.Connection
+) -> None:
+    if answer["property"] == "name":
+        nameQuestions = [
+            inquirer.Text(
+                "name",
+                message="Enter new name",
+                validate=lambda _, x: x != "",
+            ),
+        ]
+        nameAnswers = inquirer.prompt(nameQuestions)
+        cursor.execute(
+            "UPDATE project_ideas SET name=? WHERE id=?",
+            (nameAnswers["name"], id),
+        )
+    elif answer["property"] == "description":
+        descriptionQuestions = [
+            inquirer.Text(
+                "description",
+                message="Enter new description",
+            ),
+        ]
+        descriptionAnswers = inquirer.prompt(descriptionQuestions)
+        cursor.execute(
+            "UPDATE project_ideas SET description=? WHERE id=?",
+            (descriptionAnswers["description"], id),
+        )
+    elif answer["property"] == "status":
+        statusQuestions = [
+            inquirer.List(
+                "status",
+                message="Select new status",
+                choices=[s.value for s in Status],
+            ),
+        ]
+        statusAnswers = inquirer.prompt(statusQuestions)
+        cursor.execute(
+            "UPDATE project_ideas SET status=? WHERE id=?",
+            (statusAnswers["status"], id),
+        )
+    elif answer["property"] == "difficulty":
+        difficultyQuestions = [
+            inquirer.List(
+                "difficulty",
+                message="Select new difficulty",
+                choices=[d.value for d in Difficulty],
+            ),
+        ]
+        difficultyAnswers = inquirer.prompt(difficultyQuestions)
+        cursor.execute(
+            "UPDATE project_ideas SET difficulty=? WHERE id=?",
+            (difficultyAnswers["difficulty"], id),
+        )
+    connection.commit()
